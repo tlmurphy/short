@@ -1,9 +1,10 @@
 package com.tlmurphy.short
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
-import akka.actor.typed.ActorSystem
+import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -19,14 +20,14 @@ class UrlRoutesSpec
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
 
-  val userRegistry = testKit.spawn(UrlRegistry())
-  lazy val routes = new UrlRoutes(userRegistry).urlRoutes
+  val userRegistry: ActorRef[UrlRegistry.Command] = testKit.spawn(UrlRegistry())
+  lazy val routes: Route = new UrlRoutes(userRegistry).urlRoutes
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   import JsonFormats._
 
   "UrlRoutes" should {
-    "return no urls if no present (GET /urls)" in {
+    "return no urls if none are present (GET /urls)" in {
       val request = HttpRequest(uri = "/urls")
 
       request ~> routes ~> check {
@@ -54,6 +55,14 @@ class UrlRoutesSpec
       }
     }
 
+    "be able to redirect given a short URL" in {
+      val request = Get("/veryshort")
+
+      request ~> routes ~> check {
+        status shouldEqual StatusCodes.PermanentRedirect
+      }
+    }
+
     "be able to remove urls (DELETE /urls)" in {
       val request = Delete(uri = "/urls/veryshort")
 
@@ -63,6 +72,14 @@ class UrlRoutesSpec
         entityAs[
           String
         ] shouldEqual """{"description":"Short URL veryshort deleted."}"""
+      }
+    }
+
+    "return a 404 when given a URL that does that exist in the URL mapping" in {
+      val request = Get("/veryshort")
+
+      request ~> routes ~> check {
+        status shouldEqual StatusCodes.NotFound
       }
     }
   }
