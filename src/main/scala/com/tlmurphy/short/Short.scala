@@ -8,13 +8,10 @@ import akka.http.scaladsl.server.Route
 import scala.util.Failure
 import scala.util.Success
 
-//#main-class
-object QuickstartApp {
-  //#start-http-server
+object Short {
   private def startHttpServer(
       routes: Route
   )(implicit system: ActorSystem[_]): Unit = {
-    // Akka HTTP still needs a classic ActorSystem to start
     import system.executionContext
 
     val futureBinding = Http().newServerAt("localhost", 8080).bind(routes)
@@ -31,20 +28,17 @@ object QuickstartApp {
         system.terminate()
     }
   }
-  //#start-http-server
-  def main(args: Array[String]): Unit = {
-    //#server-bootstrapping
-    val rootBehavior = Behaviors.setup[Nothing] { context =>
-      val userRegistryActor = context.spawn(UrlRegistry(), "UserRegistryActor")
-      context.watch(userRegistryActor)
 
-      val routes = new UrlRoutes(userRegistryActor)(context.system)
+  def main(args: Array[String]): Unit = {
+    val rootBehavior = Behaviors.setup[Nothing] { context =>
+      val urlRegistryActor = context.spawn(UrlRegistry(), "UrlRegistryActor")
+      context.watch(urlRegistryActor)
+
+      val routes = new UrlRoutes(urlRegistryActor)(context.system)
       startHttpServer(routes.urlRoutes)(context.system)
 
       Behaviors.empty
     }
-    val system = ActorSystem[Nothing](rootBehavior, "HelloAkkaHttpServer")
-    //#server-bootstrapping
+    ActorSystem[Nothing](rootBehavior, "ShortAkkaHttpServer")
   }
 }
-//#main-class
