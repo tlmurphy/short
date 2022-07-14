@@ -1,17 +1,14 @@
 package com.tlmurphy.short
 
 import com.tlmurphy.short.UrlRegistry.ActionPerformed
+import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
-//#json-formats
-import spray.json.DefaultJsonProtocol
-
-object JsonFormats  {
-  // import the default encoders for primitive types (Int, String, Lists etc)
+object JsonFormats {
   import DefaultJsonProtocol._
 
-  implicit val userJsonFormat = jsonFormat3(Url)
-  implicit val usersJsonFormat = jsonFormat1(Urls)
+  implicit val urlJsonFormat: RootJsonFormat[Url] = jsonFormat2(Url)
+  implicit val urlsJsonFormat: RootJsonFormat[Urls] = jsonFormat1(Urls)
 
-  implicit val actionPerformedJsonFormat = jsonFormat1(ActionPerformed)
+  implicit val actionPerformedJsonFormat: RootJsonFormat[ActionPerformed] =
+    jsonFormat1(ActionPerformed)
 }
-//#json-formats
