@@ -13,14 +13,17 @@ button.addEventListener('click', () => {
   const url = input.value;
   fetch('http://localhost:8080/urls', {
     method: 'POST',
-    body: JSON.stringify({ shortUrl: 'something', originalUrl: url }),
+    body: JSON.stringify({ url: url }),
     headers: { 'Content-Type': 'application/json' },
   })
     .then((res) => res.json())
     .then(
       (json) => {
-        console.log(json);
-        document.getElementById('shortened').textContent = url;
+        console.log(json.shortUrl);
+        const shortUrl = `http://localhost:8080/${json.shortUrl}`;
+        document.getElementById(
+          'shortened'
+        ).innerHTML = `<a href=${shortUrl} target="_blank">${shortUrl}</a>`;
       },
       (err) => console.log(err)
     );
