@@ -1,0 +1,11 @@
+*.class
+.idea
+.bsp
+
+# SBt
+project/project/
+project/target/
+target/
+
+# mac
+.DS_Store
