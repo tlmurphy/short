@@ -5,7 +5,10 @@ import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import scala.collection.immutable
 
-final case class Url(name: String, shortUrlName: String)
+// For the URL model, shortUrlName will be used as the key as it should be unique
+final case class Url(shortUrl: String, originalUrl: String) {
+  override def toString: String = s"($shortUrl) -> ($originalUrl)"
+}
 final case class Urls(urls: immutable.Seq[Url])
 
 object UrlRegistry {
@@ -29,13 +32,13 @@ object UrlRegistry {
         replyTo ! Urls(urls.toSeq)
         Behaviors.same
       case CreateUrl(url, replyTo) =>
-        replyTo ! ActionPerformed(s"Url ${url.name} created.")
+        replyTo ! ActionPerformed(s"Short URL ${url.shortUrl} created.")
         registry(urls + url)
       case GetUrl(name, replyTo) =>
-        replyTo ! GetUrlResponse(urls.find(_.name == name))
+        replyTo ! GetUrlResponse(urls.find(_.shortUrl == name))
         Behaviors.same
       case DeleteUrl(name, replyTo) =>
-        replyTo ! ActionPerformed(s"Url $name deleted.")
-        registry(urls.filterNot(_.name == name))
+        replyTo ! ActionPerformed(s"Short URL $name deleted.")
+        registry(urls.filterNot(_.shortUrl == name))
     }
 }
