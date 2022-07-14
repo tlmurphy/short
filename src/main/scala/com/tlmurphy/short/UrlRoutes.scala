@@ -24,14 +24,14 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
     system.settings.config.getDuration("my-app.routes.ask-timeout")
   )
 
-  def getUrls: Future[Urls] =
-    urlRegistry.ask(GetUrls)
-  def getUrl(name: String): Future[GetUrlResponse] =
-    urlRegistry.ask(GetUrl(name, _))
+  def getUrls: Future[ShortUrls] =
+    urlRegistry.ask(GetShortUrls)
+  def getUrl(name: String): Future[GetShortUrlResponse] =
+    urlRegistry.ask(GetShortUrl(name, _))
   def createUrl(url: Url): Future[ActionPerformed] =
-    urlRegistry.ask(CreateUrl(url, _))
+    urlRegistry.ask(CreateShortUrl(url, _))
   def deleteUrl(name: String): Future[ActionPerformed] =
-    urlRegistry.ask(DeleteUrl(name, _))
+    urlRegistry.ask(DeleteShortUrl(name, _))
   def resolveShortUrl(name: String): Future[ResolveShortUrlResponse] =
     urlRegistry.ask(ResolveShortUrl(name, _))
 
@@ -57,9 +57,9 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
                 },
                 handleRejections(rejectionHandler) {
                   post {
-                    entity(as[Url]) { url =>
-                      validate(validateUrl(url.originalUrl), "uh oh :)") {
-                        onSuccess(createUrl(url)) { performed =>
+                    entity(as[Url]) { originalUrl =>
+                      validate(validateUrl(originalUrl.url), "uh oh :)") {
+                        onSuccess(createUrl(originalUrl)) { performed =>
                           complete(StatusCodes.Created, performed)
                         }
                       }
@@ -73,7 +73,7 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
                 get {
                   rejectEmptyResponse {
                     onSuccess(getUrl(name)) { response =>
-                      complete(response.maybeUrl)
+                      complete(StatusCodes.OK, response.maybeShortUrl)
                     }
                   }
                 },

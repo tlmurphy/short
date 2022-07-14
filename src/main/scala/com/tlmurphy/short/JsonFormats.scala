@@ -6,8 +6,13 @@ import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 object JsonFormats {
   import DefaultJsonProtocol._
 
-  implicit val urlJsonFormat: RootJsonFormat[Url] = jsonFormat2(Url)
-  implicit val urlsJsonFormat: RootJsonFormat[Urls] = jsonFormat1(Urls)
+  implicit val urlJsonFormat: RootJsonFormat[Url] = jsonFormat1(Url)
+  implicit val shortUrlJsonFormat: RootJsonFormat[ShortUrl] = jsonFormat2(
+    ShortUrl
+  )
+  implicit val shortUrlsJsonFormat: RootJsonFormat[ShortUrls] = jsonFormat1(
+    ShortUrls
+  )
 
   implicit val actionPerformedJsonFormat: RootJsonFormat[ActionPerformed] =
     jsonFormat1(ActionPerformed)
