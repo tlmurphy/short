@@ -11,7 +11,11 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 //#set-up
-class UrlRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
+class UrlRoutesSpec
+    extends AnyWordSpec
+    with Matchers
+    with ScalaFutures
+    with ScalatestRouteTest {
   //#test-top
 
   // the Akka HTTP route testkit does not yet support a typed actor system (https://github.com/akka/akka-http/issues/2036)
@@ -26,7 +30,7 @@ class UrlRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
   // but we could "mock" it by implementing it in-place or by using a TestProbe
   // created with testKit.createTestProbe()
   val userRegistry = testKit.spawn(UrlRegistry())
-  lazy val routes = new UserRoutes(userRegistry).userRoutes
+  lazy val routes = new UrlRoutes(userRegistry).urlRoutes
 
   // use the json formats to marshal and unmarshall objects in the test
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -54,7 +58,10 @@ class UrlRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sca
     //#testing-post
     "be able to add users (POST /users)" in {
       val user = Url("Kapi", 42, "jp")
-      val userEntity = Marshal(user).to[MessageEntity].futureValue // futureValue is from ScalaFutures
+      val userEntity =
+        Marshal(user)
+          .to[MessageEntity]
+          .futureValue // futureValue is from ScalaFutures
 
       // using the RequestBuilding DSL:
       val request = Post("/users").withEntity(userEntity)

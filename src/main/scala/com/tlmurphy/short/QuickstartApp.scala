@@ -11,7 +11,9 @@ import scala.util.Success
 //#main-class
 object QuickstartApp {
   //#start-http-server
-  private def startHttpServer(routes: Route)(implicit system: ActorSystem[_]): Unit = {
+  private def startHttpServer(
+      routes: Route
+  )(implicit system: ActorSystem[_]): Unit = {
     // Akka HTTP still needs a classic ActorSystem to start
     import system.executionContext
 
@@ -19,7 +21,11 @@ object QuickstartApp {
     futureBinding.onComplete {
       case Success(binding) =>
         val address = binding.localAddress
-        system.log.info("Server online at http://{}:{}/", address.getHostString, address.getPort)
+        system.log.info(
+          "Server online at http://{}:{}/",
+          address.getHostString,
+          address.getPort
+        )
       case Failure(ex) =>
         system.log.error("Failed to bind HTTP endpoint, terminating system", ex)
         system.terminate()
@@ -32,8 +38,8 @@ object QuickstartApp {
       val userRegistryActor = context.spawn(UrlRegistry(), "UserRegistryActor")
       context.watch(userRegistryActor)
 
-      val routes = new UserRoutes(userRegistryActor)(context.system)
-      startHttpServer(routes.userRoutes)(context.system)
+      val routes = new UrlRoutes(userRegistryActor)(context.system)
+      startHttpServer(routes.urlRoutes)(context.system)
 
       Behaviors.empty
     }
