@@ -29,40 +29,57 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
     urlRegistry.ask(CreateUrl(url, _))
   def deleteUrl(name: String): Future[ActionPerformed] =
     urlRegistry.ask(DeleteUrl(name, _))
+  def resolveShortUrl(name: String): Future[ResolveShortUrlResponse] =
+    urlRegistry.ask(ResolveShortUrl(name, _))
 
-  val urlRoutes: Route =
-    pathPrefix("urls") {
-      concat(
-        pathEnd {
-          concat(
-            get {
-              complete(getUrls)
-            },
-            post {
-              entity(as[Url]) { url =>
-                onSuccess(createUrl(url)) { performed =>
-                  complete((StatusCodes.Created, performed))
+  val urlRoutes: Route = {
+    concat(
+      pathPrefix("urls") {
+        concat(
+          pathEnd {
+            concat(
+              get {
+                complete(getUrls)
+              },
+              post {
+                entity(as[Url]) { url =>
+                  onSuccess(createUrl(url)) { performed =>
+                    complete((StatusCodes.Created, performed))
+                  }
                 }
               }
-            }
-          )
-        },
-        path(Segment) { name =>
-          concat(
-            get {
-              rejectEmptyResponse {
-                onSuccess(getUrl(name)) { response =>
-                  complete(response.maybeUrl)
+            )
+          },
+          path(Segment) { name =>
+            concat(
+              get {
+                rejectEmptyResponse {
+                  onSuccess(getUrl(name)) { response =>
+                    complete(response.maybeUrl)
+                  }
+                }
+              },
+              delete {
+                onSuccess(deleteUrl(name)) { performed =>
+                  complete((StatusCodes.OK, performed))
                 }
               }
-            },
-            delete {
-              onSuccess(deleteUrl(name)) { performed =>
-                complete((StatusCodes.OK, performed))
-              }
-            }
-          )
+            )
+          }
+        )
+      },
+      path(Remaining) { url =>
+        onSuccess(resolveShortUrl(url)) { res =>
+          res.maybeShortUrl match {
+            case Some(url) => redirect(url, StatusCodes.PermanentRedirect)
+            case None =>
+              complete(
+                StatusCodes.NotFound,
+                "The requested resource could not be found."
+              )
+          }
         }
-      )
-    }
+      }
+    )
+  }
 }
