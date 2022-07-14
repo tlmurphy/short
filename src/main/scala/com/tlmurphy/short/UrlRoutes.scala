@@ -2,7 +2,7 @@ package com.tlmurphy.short
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.{RejectionHandler, Route, ValidationRejection}
+import akka.http.scaladsl.server.Route
 import akka.actor.typed.ActorRef
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.AskPattern._
@@ -10,8 +10,6 @@ import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 import scala.concurrent.Future
-import scala.util.Try
-import java.net.URL
 import com.tlmurphy.short.UrlRegistry._
 
 class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
@@ -26,24 +24,16 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
 
   def getUrls: Future[ShortUrls] =
     urlRegistry.ask(GetShortUrls)
-  def getUrl(name: String): Future[GetShortUrlResponse] =
+  def getUrl(name: String): Future[Either[GetFailure, GetSuccess]] =
     urlRegistry.ask(GetShortUrl(name, _))
-  def createUrl(url: Url): Future[ActionPerformed] =
+  def createUrl(url: Url): Future[Either[CreateFailure, CreateSuccess]] =
     urlRegistry.ask(CreateShortUrl(url, _))
-  def deleteUrl(name: String): Future[ActionPerformed] =
+  def deleteUrl(name: String): Future[Either[DeleteFailure, DeleteSuccess]] =
     urlRegistry.ask(DeleteShortUrl(name, _))
-  def resolveShortUrl(name: String): Future[ResolveShortUrlResponse] =
+  def resolveShortUrl(
+      name: String
+  ): Future[Either[ResolveShortUrlFailure, ResolveShortUrlSuccess]] =
     urlRegistry.ask(ResolveShortUrl(name, _))
-
-  def validateUrl(url: String): Boolean = Try(new URL(url).toURI).isSuccess
-
-  def rejectionHandler: RejectionHandler =
-    RejectionHandler
-      .newBuilder()
-      .handle { case ValidationRejection(message, _) =>
-        complete(StatusCodes.BadRequest, message)
-      }
-      .result()
 
   val urlRoutes: Route = {
     cors() {
@@ -55,14 +45,16 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
                 get {
                   complete(getUrls)
                 },
-                handleRejections(rejectionHandler) {
-                  post {
-                    entity(as[Url]) { originalUrl =>
-                      validate(validateUrl(originalUrl.url), "uh oh :)") {
-                        onSuccess(createUrl(originalUrl)) { performed =>
-                          complete(StatusCodes.Created, performed)
-                        }
-                      }
+                post {
+                  entity(as[Url]) { originalUrl =>
+                    onSuccess(createUrl(originalUrl)) {
+                      case Right(success) =>
+                        complete(StatusCodes.Created, success.shortUrl)
+                      case Left(failure) =>
+                        complete(
+                          StatusCodes.BadRequest,
+                          ResponseFailure(failure.description)
+                        )
                     }
                   }
                 }
@@ -71,15 +63,25 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
             path(Segment) { name =>
               concat(
                 get {
-                  rejectEmptyResponse {
-                    onSuccess(getUrl(name)) { response =>
-                      complete(StatusCodes.OK, response.maybeShortUrl)
-                    }
+                  onSuccess(getUrl(name)) {
+                    case Right(success) =>
+                      complete(StatusCodes.OK, success.shortUrl)
+                    case Left(failure) =>
+                      complete(
+                        StatusCodes.NotFound,
+                        ResponseFailure(failure.description)
+                      )
                   }
                 },
                 delete {
-                  onSuccess(deleteUrl(name)) { performed =>
-                    complete((StatusCodes.OK, performed))
+                  onSuccess(deleteUrl(name)) {
+                    case Right(success) =>
+                      complete(StatusCodes.OK, success.description)
+                    case Left(failure) =>
+                      complete(
+                        StatusCodes.NotFound,
+                        failure.description
+                      )
                   }
                 }
               )
@@ -87,15 +89,14 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
           )
         },
         path(Remaining) { url =>
-          onSuccess(resolveShortUrl(url)) { res =>
-            res.maybeShortUrl match {
-              case Some(url) => redirect(url, StatusCodes.PermanentRedirect)
-              case None =>
-                complete(
-                  StatusCodes.NotFound,
-                  "The requested resource could not be found."
-                )
-            }
+          onSuccess(resolveShortUrl(url)) {
+            case Right(success) =>
+              redirect(success.shortUrl, StatusCodes.PermanentRedirect)
+            case Left(failure) =>
+              complete(
+                StatusCodes.NotFound,
+                ResponseFailure(failure.description)
+              )
           }
         }
       )

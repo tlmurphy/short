@@ -1,6 +1,5 @@
 package com.tlmurphy.short
 
-import com.tlmurphy.short.UrlRegistry.ActionPerformed
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 object JsonFormats {
@@ -14,6 +13,6 @@ object JsonFormats {
     ShortUrls
   )
 
-  implicit val actionPerformedJsonFormat: RootJsonFormat[ActionPerformed] =
-    jsonFormat1(ActionPerformed)
+  implicit val responseFailureJsonFormat: RootJsonFormat[ResponseFailure] =
+    jsonFormat1(ResponseFailure)
 }
