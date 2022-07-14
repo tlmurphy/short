@@ -4,7 +4,7 @@ import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{Route, ValidationRejection}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -80,6 +80,20 @@ class UrlRoutesSpec
 
       request ~> routes ~> check {
         status shouldEqual StatusCodes.NotFound
+      }
+    }
+
+    "return a 400 when attempting to create a url mapping that contains a non-url" in {
+      val url = Url("veryshort", "oh")
+      val urlEntity =
+        Marshal(url)
+          .to[MessageEntity]
+          .futureValue
+
+      val request = Post("/urls").withEntity(urlEntity)
+      request -> routes -> check {
+        rejection shouldEqual ValidationRejection("uh oh :)")
+        status shouldEqual StatusCodes.BadRequest
       }
     }
   }

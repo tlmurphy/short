@@ -2,14 +2,16 @@ package com.tlmurphy.short
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{RejectionHandler, Route, ValidationRejection}
 import akka.actor.typed.ActorRef
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.util.Timeout
-
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+
 import scala.concurrent.Future
+import scala.util.Try
+import java.net.URL
 import com.tlmurphy.short.UrlRegistry._
 
 class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
@@ -33,6 +35,16 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
   def resolveShortUrl(name: String): Future[ResolveShortUrlResponse] =
     urlRegistry.ask(ResolveShortUrl(name, _))
 
+  def validateUrl(url: String): Boolean = Try(new URL(url).toURI).isSuccess
+
+  def rejectionHandler: RejectionHandler =
+    RejectionHandler
+      .newBuilder()
+      .handle { case ValidationRejection(message, _) =>
+        complete(StatusCodes.BadRequest, message)
+      }
+      .result()
+
   val urlRoutes: Route = {
     cors() {
       concat(
@@ -43,10 +55,14 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
                 get {
                   complete(getUrls)
                 },
-                post {
-                  entity(as[Url]) { url =>
-                    onSuccess(createUrl(url)) { performed =>
-                      complete((StatusCodes.Created, performed))
+                handleRejections(rejectionHandler) {
+                  post {
+                    entity(as[Url]) { url =>
+                      validate(validateUrl(url.originalUrl), "uh oh :)") {
+                        onSuccess(createUrl(url)) { performed =>
+                          complete(StatusCodes.Created, performed)
+                        }
+                      }
                     }
                   }
                 }
