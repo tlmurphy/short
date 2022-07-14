@@ -8,6 +8,7 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.util.Timeout
 
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import scala.concurrent.Future
 import com.tlmurphy.short.UrlRegistry._
 
@@ -33,53 +34,55 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
     urlRegistry.ask(ResolveShortUrl(name, _))
 
   val urlRoutes: Route = {
-    concat(
-      pathPrefix("urls") {
-        concat(
-          pathEnd {
-            concat(
-              get {
-                complete(getUrls)
-              },
-              post {
-                entity(as[Url]) { url =>
-                  onSuccess(createUrl(url)) { performed =>
-                    complete((StatusCodes.Created, performed))
+    cors() {
+      concat(
+        pathPrefix("urls") {
+          concat(
+            pathEnd {
+              concat(
+                get {
+                  complete(getUrls)
+                },
+                post {
+                  entity(as[Url]) { url =>
+                    onSuccess(createUrl(url)) { performed =>
+                      complete((StatusCodes.Created, performed))
+                    }
                   }
                 }
-              }
-            )
-          },
-          path(Segment) { name =>
-            concat(
-              get {
-                rejectEmptyResponse {
-                  onSuccess(getUrl(name)) { response =>
-                    complete(response.maybeUrl)
-                  }
-                }
-              },
-              delete {
-                onSuccess(deleteUrl(name)) { performed =>
-                  complete((StatusCodes.OK, performed))
-                }
-              }
-            )
-          }
-        )
-      },
-      path(Remaining) { url =>
-        onSuccess(resolveShortUrl(url)) { res =>
-          res.maybeShortUrl match {
-            case Some(url) => redirect(url, StatusCodes.PermanentRedirect)
-            case None =>
-              complete(
-                StatusCodes.NotFound,
-                "The requested resource could not be found."
               )
+            },
+            path(Segment) { name =>
+              concat(
+                get {
+                  rejectEmptyResponse {
+                    onSuccess(getUrl(name)) { response =>
+                      complete(response.maybeUrl)
+                    }
+                  }
+                },
+                delete {
+                  onSuccess(deleteUrl(name)) { performed =>
+                    complete((StatusCodes.OK, performed))
+                  }
+                }
+              )
+            }
+          )
+        },
+        path(Remaining) { url =>
+          onSuccess(resolveShortUrl(url)) { res =>
+            res.maybeShortUrl match {
+              case Some(url) => redirect(url, StatusCodes.PermanentRedirect)
+              case None =>
+                complete(
+                  StatusCodes.NotFound,
+                  "The requested resource could not be found."
+                )
+            }
           }
         }
-      }
-    )
+      )
+    }
   }
 }
