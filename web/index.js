@@ -17,6 +17,10 @@ const setShortUrl = (url) => {
   ).innerHTML = `<p>Shortened URL: <a href=${shortUrl} target="_blank">${shortUrl}</a></p>`;
 };
 
+const resetShortUrl = () => {
+  document.getElementById('shortened').innerHTML = '';
+};
+
 button.addEventListener('click', async () => {
   const url = input.value;
   const response = await fetch(`${server}/urls`, {
@@ -31,6 +35,7 @@ button.addEventListener('click', async () => {
       setShortUrl(json.url);
     } else {
       alert(json.message);
+      resetShortUrl();
     }
   } else {
     setShortUrl(json.url);
