@@ -12,7 +12,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import scala.concurrent.Future
 import com.tlmurphy.short.UrlRegistry._
 
-class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
+class UrlRoutes(urlRegistry: ActorRef[Command])(implicit
     val system: ActorSystem[_]
 ) {
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -22,17 +22,14 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
     system.settings.config.getDuration("my-app.routes.ask-timeout")
   )
 
-  def getUrls: Future[ShortUrls] =
-    urlRegistry.ask(GetShortUrls)
-  def getUrl(name: String): Future[Either[GetFailure, GetSuccess]] =
+  def getUrls: Future[ShortUrls] = urlRegistry.ask(GetShortUrls)
+  def getUrl(name: String): Future[Response] =
     urlRegistry.ask(GetShortUrl(name, _))
-  def createUrl(url: Url): Future[Either[CreateFailure, CreateSuccess]] =
+  def createUrl(url: Url): Future[Response] =
     urlRegistry.ask(CreateShortUrl(url, _))
-  def deleteUrl(name: String): Future[Either[DeleteFailure, DeleteSuccess]] =
+  def deleteUrl(name: String): Future[Response] =
     urlRegistry.ask(DeleteShortUrl(name, _))
-  def resolveShortUrl(
-      name: String
-  ): Future[Either[ResolveShortUrlFailure, ResolveShortUrlSuccess]] =
+  def resolveShortUrl(name: String): Future[Response] =
     urlRegistry.ask(ResolveShortUrl(name, _))
 
   val urlRoutes: Route = {
@@ -49,12 +46,9 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
                   entity(as[Url]) { originalUrl =>
                     onSuccess(createUrl(originalUrl)) {
                       case Right(success) =>
-                        complete(StatusCodes.Created, success.shortUrl)
+                        complete(StatusCodes.Created, success)
                       case Left(failure) =>
-                        complete(
-                          StatusCodes.BadRequest,
-                          ResponseFailure(failure.description)
-                        )
+                        complete(StatusCodes.BadRequest, failure)
                     }
                   }
                 }
@@ -65,23 +59,17 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
                 get {
                   onSuccess(getUrl(name)) {
                     case Right(success) =>
-                      complete(StatusCodes.OK, success.shortUrl)
+                      complete(StatusCodes.OK, success)
                     case Left(failure) =>
-                      complete(
-                        StatusCodes.NotFound,
-                        ResponseFailure(failure.description)
-                      )
+                      complete(StatusCodes.NotFound, failure)
                   }
                 },
                 delete {
                   onSuccess(deleteUrl(name)) {
                     case Right(success) =>
-                      complete(StatusCodes.OK, success.description)
+                      complete(StatusCodes.OK, success)
                     case Left(failure) =>
-                      complete(
-                        StatusCodes.NotFound,
-                        failure.description
-                      )
+                      complete(StatusCodes.NotFound, failure)
                   }
                 }
               )
@@ -91,12 +79,12 @@ class UrlRoutes(urlRegistry: ActorRef[UrlRegistry.Command])(implicit
         path(Remaining) { url =>
           onSuccess(resolveShortUrl(url)) {
             case Right(success) =>
-              redirect(success.shortUrl, StatusCodes.PermanentRedirect)
-            case Left(failure) =>
-              complete(
-                StatusCodes.NotFound,
-                ResponseFailure(failure.description)
+              redirect(
+                success.url.get.originalUrl, // This is a safe get since it's a guaranteed
+                StatusCodes.PermanentRedirect
               )
+            case Left(failure) =>
+              complete(StatusCodes.NotFound, failure)
           }
         }
       )
