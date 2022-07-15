@@ -2,10 +2,13 @@
 .idea
 .bsp
 
-# SBt
+# sbt
 project/project/
 project/target/
 target/
 
 # mac
 .DS_Store
+
+# node
+web/node_modules

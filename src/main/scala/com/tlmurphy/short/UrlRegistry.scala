@@ -47,7 +47,12 @@ object UrlRegistry {
         } else {
           val randomAlphanumeric = new Random().alphanumeric.take(7).mkString
           val newShortUrl = ShortUrl(randomAlphanumeric, originalUrl.url)
-          replyTo ! Right(ResponseSuccess(s"$newShortUrl created"))
+          replyTo ! Right(
+            ResponseSuccess(
+              s"$newShortUrl successfully created",
+              Some(newShortUrl)
+            )
+          )
           registry(urls + newShortUrl)
         }
       case GetShortUrl(name, replyTo) =>

@@ -1,5 +1,6 @@
 const input = document.querySelector('input');
 const button = document.querySelector('button');
+const server = 'http://localhost:8081';
 
 // Window event listener for handling "Enter" key, which will click the button
 window.addEventListener('keypress', (event) => {
@@ -9,22 +10,20 @@ window.addEventListener('keypress', (event) => {
   }
 });
 
-button.addEventListener('click', () => {
+button.addEventListener('click', async () => {
   const url = input.value;
-  fetch('http://localhost:8080/urls', {
+  const response = await fetch(`${server}/urls`, {
     method: 'POST',
     body: JSON.stringify({ url: url }),
     headers: { 'Content-Type': 'application/json' },
-  })
-    .then((res) => res.json())
-    .then(
-      (json) => {
-        console.log(json.shortUrl);
-        const shortUrl = `http://localhost:8080/${json.shortUrl}`;
-        document.getElementById(
-          'shortened'
-        ).innerHTML = `<a href=${shortUrl} target="_blank">${shortUrl}</a>`;
-      },
-      (err) => console.log(err)
-    );
+  });
+  const json = await response.json();
+  if (!response.ok) {
+    alert(json.message);
+  } else {
+    const shortUrl = `${server}/${json.url.shortUrl}`;
+    document.getElementById(
+      'shortened'
+    ).innerHTML = `<a href=${shortUrl} target="_blank">${shortUrl}</a>`;
+  }
 });
