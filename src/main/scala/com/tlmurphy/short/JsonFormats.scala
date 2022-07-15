@@ -19,7 +19,7 @@ object JsonFormats {
       ResponseSuccess
     )
   implicit val responseFailureJsonFormat: RootJsonFormat[ResponseFailure] =
-    jsonFormat1(
+    jsonFormat2(
       ResponseFailure
     )
 }

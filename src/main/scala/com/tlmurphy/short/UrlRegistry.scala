@@ -41,19 +41,28 @@ object UrlRegistry {
         if (!validUrl(originalUrl.url)) {
           replyTo ! Left(ResponseFailure("URL is not valid."))
           Behaviors.same
-        } else if (urls.exists(_.originalUrl == originalUrl.url)) {
-          replyTo ! Left(ResponseFailure("URL mapping already exists."))
-          Behaviors.same
         } else {
-          val randomAlphanumeric = new Random().alphanumeric.take(7).mkString
-          val newShortUrl = ShortUrl(randomAlphanumeric, originalUrl.url)
-          replyTo ! Right(
-            ResponseSuccess(
-              s"$newShortUrl successfully created",
-              Some(newShortUrl)
-            )
-          )
-          registry(urls + newShortUrl)
+          urls.find(_.originalUrl == originalUrl.url) match {
+            case Some(existingShortUrl) =>
+              replyTo ! Left(
+                ResponseFailure(
+                  "URL mapping already exists.",
+                  Some(existingShortUrl)
+                )
+              )
+              Behaviors.same
+            case None =>
+              val randomAlphanumeric =
+                new Random().alphanumeric.take(7).mkString
+              val newShortUrl = ShortUrl(randomAlphanumeric, originalUrl.url)
+              replyTo ! Right(
+                ResponseSuccess(
+                  s"$newShortUrl successfully created",
+                  Some(newShortUrl)
+                )
+              )
+              registry(urls + newShortUrl)
+          }
         }
       case GetShortUrl(name, replyTo) =>
         urls.find(_.shortUrl == name) match {

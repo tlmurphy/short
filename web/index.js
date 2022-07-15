@@ -10,6 +10,13 @@ window.addEventListener('keypress', (event) => {
   }
 });
 
+const setShortUrl = (url) => {
+  const shortUrl = `${server}/${url.shortUrl}`;
+  document.getElementById(
+    'shortened'
+  ).innerHTML = `<p>Shortened URL: <a href=${shortUrl} target="_blank">${shortUrl}</a></p>`;
+};
+
 button.addEventListener('click', async () => {
   const url = input.value;
   const response = await fetch(`${server}/urls`, {
@@ -19,11 +26,13 @@ button.addEventListener('click', async () => {
   });
   const json = await response.json();
   if (!response.ok) {
-    alert(json.message);
+    if (json.url) {
+      alert(json.message + '\nYour existing short URL will now be displayed.');
+      setShortUrl(json.url);
+    } else {
+      alert(json.message);
+    }
   } else {
-    const shortUrl = `${server}/${json.url.shortUrl}`;
-    document.getElementById(
-      'shortened'
-    ).innerHTML = `<a href=${shortUrl} target="_blank">${shortUrl}</a>`;
+    setShortUrl(json.url);
   }
 });
