@@ -4,8 +4,8 @@ A simple URL shortener.
 
 ## Prerequisites
 
-1. scala
-2. sbt
+1. scala v2.13.4
+2. sbt v1.7.1
 3. npm
 
 ## Running the App
@@ -20,6 +20,62 @@ The backend and frontend can be run using two separate commands:
 
 The backend is served on port 8081 while the frontend is served
 on port 8080. To get to the webpage, navigate to http://localhost:8080.
+
+## API Guide
+
+Create new short url mapping:
+```json
+POST /urls
+RESP:
+201 CREATED
+{
+  "message": "(o7iFyQz) -> (http://google.com) successfully created",
+  "url": {
+    "originalUrl": "http://google.com",
+    "shortUrl": "o7iFyQz"
+  }
+}
+```
+
+Get all url mappings:
+```json
+GET /urls
+RESP:
+200 OK
+{
+  "urls": [
+    {
+      "originalUrl": "http://google.com",
+      "shortUrl": "o7iFyQz"
+    }
+  ]
+}
+```
+
+Get a single url mapping:
+```json
+GET /urls/o7iFyQz
+RESP:
+200 OK
+{
+  "message": "(o7iFyQz) -> (http://google.com) successfully retrieved",
+  "url": {
+    "originalUrl": "http://google.com",
+    "shortUrl": "o7iFyQz"
+  }
+}
+```
+
+Delete a single url mapping:
+```json
+DELETE /urls/o7iFyQz
+RESP:
+200 OK
+{
+  "message": "Short URL o7iFyQz successfully deleted."
+}
+```
+
 
 ## Assumptions
 
