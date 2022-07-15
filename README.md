@@ -53,8 +53,8 @@ I ended up doing the url validation all in the backend.
 ## Potential Improvements
 
 1. Use an actual database for storing the short url to original url mappings.
-2. The tests are not stateless in that you can run a single test and it will fail
-because it relies on state from a previous test (the tests that involve creating and deleting a url).
+2. Some route unit tests rely on the POST functionality to work. This is not good
+practice and should be refactored. I've put a comment in the test file for more details.
 3. The routes file is a little unwieldy and could use some refactoring.
 4. I wanted to dockerize the app but ran out of time. Also realized that docker for
 desktop now costs money if used in an enterprise setting.
