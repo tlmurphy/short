@@ -11,4 +11,4 @@ target/
 .DS_Store
 
 # node
-web/node_modules
+short-akka-http/web/node_modules

@@ -4,19 +4,24 @@ A simple URL shortener.
 
 ## Prerequisites
 
-1. scala v2.13.4
-2. sbt v1.7.1
-3. npm
+1. sbt
+2. npm
 
 ## Running the App
 
+This application has two subprojects, one has the backend built using
+AkkaHttp, the other using Http4s. Note: Http4s is currently in active
+development and does not have documentation for running it.
+
+### Running the AkkaHttp Application
+
 The backend and frontend can be run using two separate commands:
 
-1. sbt run
-2. npm --prefix=web start
-
-`sbt run` starts the backend service and
-`npm --prefix=web start` serves the frontend.
+1. `cd short-akka-http/web` and `npm i` to install the http-server 
+dependency.
+2. `sbt shortAkkaHttp/run` to start the backend.
+3. Open a new terminal window and `npm --prefix=short-akka-http/web start`
+to start the frontend.
 
 The backend is served on port 8081 while the frontend is served
 on port 8080. To get to the webpage, navigate to http://localhost:8080.
@@ -76,8 +81,9 @@ RESP:
 }
 ```
 
+## Notes on Initial Implementation using AkkaHttp
 
-## Assumptions
+### Assumptions
 
 * It's assumed with this being an example exercise, that scalability isn't too big of a concern.
 More details on how scalability could be improved in the [Potential Improvements](#potential-improvements) section.
@@ -87,7 +93,7 @@ More details on how scalability could be improved in the [Potential Improvements
 so unless you clear your cookies, it isn't possible to change a short URLs destination address.
 * Internet Explorer will not be used.
 
-## Approach
+### Approach
 
 * Decided on using akka-http as the API framework as I've used it in the past.
 * Utilized the akka-http-quickstart-scala template to make the API work start faster.
@@ -96,7 +102,7 @@ but akka behaviors worked very nicely as a substitute.
 * The "registry" acts like a database and holds a set of url to short url mappings.
 * I utilized scala's `Random` utility to generate a unique 7 character alphanumeric string for the short url.
 
-## Issues Faced
+### Issues Faced
 
 * Getting the path matching for any route (to handle when a user wants to access their short url) was a challenge.
 * Input validation was a little difficult. I originally began doing the validation using an input
@@ -106,7 +112,7 @@ I ended up doing the url validation all in the backend.
 * I forgot about CORS being a problem, but found a scala library `akka-http-cors` that made it easy to handle.
 * Refactoring in general.
 
-## Potential Improvements
+### Potential Improvements
 
 1. Use an actual database for storing the short url to original url mappings.
 2. Some route unit tests rely on the POST functionality to work. This is not good
