@@ -1,4 +1,4 @@
-package com.tlmurphy.short
+package com.tlmurphy.shortAkkaHttp
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors

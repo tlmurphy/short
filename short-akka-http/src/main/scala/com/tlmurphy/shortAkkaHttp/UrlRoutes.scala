@@ -1,4 +1,4 @@
-package com.tlmurphy.short
+package com.tlmurphy.shortAkkaHttp
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.StatusCodes
@@ -10,7 +10,7 @@ import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 import scala.concurrent.Future
-import com.tlmurphy.short.UrlRegistry._
+import com.tlmurphy.shortAkkaHttp.UrlRegistry._
 
 class UrlRoutes(urlRegistry: ActorRef[Command])(implicit
     val system: ActorSystem[_]

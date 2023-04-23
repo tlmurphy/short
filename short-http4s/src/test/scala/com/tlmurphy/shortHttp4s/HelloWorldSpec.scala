@@ -1,4 +1,4 @@
-package com.tlmurphy.shorthttp4s
+package com.tlmurphy.shortHttp4s
 
 import cats.effect.IO
 import org.http4s._

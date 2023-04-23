@@ -29,7 +29,7 @@ lazy val shortAkkaHttp = (project in file("short-akka-http"))
     )
   )
 
-lazy val shortHttp4s = (project in file ("short-http4s"))
+lazy val shortHttp4s = (project in file("short-http4s"))
   .settings(
     name := "short-http4s",
     scalaVersion := "3.1.0",
@@ -41,7 +41,7 @@ lazy val shortHttp4s = (project in file ("short-http4s"))
       "org.http4s" %% "http4s-dsl" % Http4sVersion,
       "org.scalameta" %% "munit" % MunitVersion % Test,
       "org.typelevel" %% "munit-cats-effect-3" % MunitCatsEffectVersion % Test,
-      "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      "ch.qos.logback" % "logback-classic" % LogbackVersion
     ),
     testFrameworks += new TestFramework("munit.Framework")
   )

@@ -1,4 +1,4 @@
-package com.tlmurphy.short
+package com.tlmurphy.shortAkkaHttp
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.actor.typed.{ActorRef, ActorSystem}
@@ -11,7 +11,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import com.tlmurphy.short.UrlRegistry.Url
+import com.tlmurphy.shortAkkaHttp.UrlRegistry.Url
 
 class UrlRoutesSpec
     extends AnyWordSpec
