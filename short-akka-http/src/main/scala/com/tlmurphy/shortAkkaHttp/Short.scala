@@ -40,5 +40,6 @@ object Short {
       Behaviors.empty
     }
     ActorSystem[Nothing](rootBehavior, "ShortAkkaHttpServer")
+    ()
   }
 }

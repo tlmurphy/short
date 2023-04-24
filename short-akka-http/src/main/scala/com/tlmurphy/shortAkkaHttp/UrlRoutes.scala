@@ -8,9 +8,9 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-
 import scala.concurrent.Future
 import com.tlmurphy.shortAkkaHttp.UrlRegistry._
+import com.tlmurphy.shortAkkaHttp.ResponseModels._
 
 class UrlRoutes(urlRegistry: ActorRef[Command])(implicit
     val system: ActorSystem[_]

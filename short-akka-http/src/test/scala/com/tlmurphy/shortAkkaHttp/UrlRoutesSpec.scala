@@ -6,11 +6,10 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-
+import com.tlmurphy.shortAkkaHttp.ResponseModels._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-
 import com.tlmurphy.shortAkkaHttp.UrlRegistry.Url
 
 class UrlRoutesSpec
@@ -46,9 +45,9 @@ class UrlRoutesSpec
     }
 
     /** The redirect test and delete tests are not good practice, as they rely
-      * on the POST functionality to work.
-      * The better way would be to mock out the registry somehow or to insert a ShortUrl
-      * directly into it so that the tests don't rely on POST working.
+      * on the POST functionality to work. The better way would be to mock out
+      * the registry somehow or to insert a ShortUrl directly into it so that
+      * the tests don't rely on POST working.
       */
     // TODO: Remove POST dependency
     "be able to redirect given a short url" in {

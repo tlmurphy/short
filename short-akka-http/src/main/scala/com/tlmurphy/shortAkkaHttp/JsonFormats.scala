@@ -1,5 +1,6 @@
 package com.tlmurphy.shortAkkaHttp
 
+import com.tlmurphy.shortAkkaHttp.ResponseModels._
 import com.tlmurphy.shortAkkaHttp.UrlRegistry._
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 

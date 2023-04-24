@@ -2,8 +2,8 @@ package com.tlmurphy.shortAkkaHttp
 
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
-
-import java.net.URL
+import com.tlmurphy.shortAkkaHttp.ResponseModels._
+import java.net.URI
 import scala.collection.immutable
 import scala.util.{Random, Try}
 
@@ -28,7 +28,7 @@ object UrlRegistry {
   final case class ResolveShortUrl(name: String, replyTo: ResponseActorRef)
       extends Command
 
-  def validUrl(url: String): Boolean = Try(new URL(url).toURI).isSuccess
+  def validUrl(url: String): Boolean = Try(new URI(url).toURL).isSuccess
 
   def apply(): Behavior[Command] = registry(Set.empty)
 
