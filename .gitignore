@@ -1,6 +1,9 @@
 *.class
 .idea
 .bsp
+.vscode/
+.metals/
+.bloop/
 
 # sbt
 project/project/
@@ -11,4 +14,4 @@ target/
 .DS_Store
 
 # node
-short-akka-http/web/node_modules
+web/node_modules

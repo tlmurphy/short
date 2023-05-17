@@ -6,9 +6,7 @@ lazy val akkaVersion = "2.6.19"
 
 // Http4s Dependencies
 val Http4sVersion = "0.23.6"
-val MunitVersion = "0.7.29"
 val LogbackVersion = "1.2.6"
-val MunitCatsEffectVersion = "1.0.6"
 
 lazy val shortAkkaHttp = (project in file("short-akka-http"))
   .settings(
@@ -39,8 +37,7 @@ lazy val shortHttp4s = (project in file("short-http4s"))
       "org.http4s" %% "http4s-ember-client" % Http4sVersion,
       "org.http4s" %% "http4s-circe" % Http4sVersion,
       "org.http4s" %% "http4s-dsl" % Http4sVersion,
-      "org.scalameta" %% "munit" % MunitVersion % Test,
-      "org.typelevel" %% "munit-cats-effect-3" % MunitCatsEffectVersion % Test,
+      "org.typelevel" %% "munit-cats-effect" % "2.0.0-M3" % Test,
       "ch.qos.logback" % "logback-classic" % LogbackVersion
     ),
     testFrameworks += new TestFramework("munit.Framework")
