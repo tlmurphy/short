@@ -31,6 +31,7 @@ on port 8080. To get to the webpage, navigate to http://localhost:8080.
 Create new short url mapping:
 ```json
 POST /urls
+BODY: { "url": "http://google.com" }
 RESP:
 201 CREATED
 {
