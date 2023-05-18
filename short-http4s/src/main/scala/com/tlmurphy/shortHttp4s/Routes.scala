@@ -9,6 +9,7 @@ import org.http4s.circe.*
 import io.circe.syntax.*
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import com.tlmurphy.shortHttp4s.Models.ShortUrl
+import org.http4s.headers.Location
 
 case class PostBody(url: String)
 implicit val postBodyDecoder: EntityDecoder[cats.effect.IO, PostBody] =
@@ -50,4 +51,18 @@ object Routes:
           .flatMap(_ =>
             Ok(DeleteResponse(s"Short URL $url successfully deleted."))
           )
+
+      case GET -> Root / url =>
+        UrlService
+          .get(url, repo)
+          .flatMap {
+            case Some(u) =>
+              PermanentRedirect(
+                url,
+                Location(
+                  Uri.unsafeFromString(u.originalUrl)
+                ) // Should probably handle bad urls somewhere
+              )
+            case None => NotFound()
+          }
     }
