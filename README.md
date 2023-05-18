@@ -10,18 +10,20 @@ A simple URL shortener.
 ## Running the App
 
 This application has two subprojects, one has the backend built using
-AkkaHttp, the other using Http4s. Note: Http4s is currently in active
-development and does not have documentation for running it.
+AkkaHttp, the other using Http4s.
 
-### Running the AkkaHttp Application
+> Note: Start the frontend and backend in separate terminal windows
+> I've had issues when attempting to start the akka-http backend
+> in the background, probably due to the process forking.
 
-The backend and frontend can be run using two separate commands:
+Starting the frontend:
 
-1. `cd short-akka-http/web` and `npm i` to install the http-server 
-dependency.
-2. `sbt shortAkkaHttp/run` to start the backend.
-3. Open a new terminal window and `npm --prefix=web start`
-to start the frontend.
+1. `npm --prefix=web i`
+2. `npm --prefix=web start`
+
+Starting the backend:
+
+`sbt shortAkkaHttp/run` or `sbt shortHttp4s/run`
 
 The backend is served on port 8081 while the frontend is served
 on port 8080. To get to the webpage, navigate to http://localhost:8080.
