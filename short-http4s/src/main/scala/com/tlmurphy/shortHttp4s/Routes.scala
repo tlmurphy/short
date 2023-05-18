@@ -40,7 +40,7 @@ object Routes:
           body <- req.as[PostBody]
           shortUrl = ShortUrl(genShort, body.url)
           _ <- UrlService.add(shortUrl, repo)
-          resp <- Ok(
+          resp <- Created(
             CreateResponse(s"$shortUrl successfully created", shortUrl)
           )
         yield resp
