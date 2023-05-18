@@ -17,7 +17,7 @@ object Short extends IOApp.Simple:
       _ <- EmberServerBuilder
         .default[IO]
         .withHost(ipv4"0.0.0.0")
-        .withPort(port"8080")
+        .withPort(port"8081")
         .withHttpApp(httpApp)
         .build
         .useForever

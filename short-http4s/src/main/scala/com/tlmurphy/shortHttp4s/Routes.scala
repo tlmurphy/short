@@ -14,18 +14,40 @@ case class PostBody(url: String)
 implicit val postBodyDecoder: EntityDecoder[cats.effect.IO, PostBody] =
   jsonOf[IO, PostBody]
 
+case class GetAllResponse(urls: List[ShortUrl])
+case class GetResponse(message: String, url: Option[ShortUrl] = None)
+case class CreateResponse(message: String, url: ShortUrl)
+case class DeleteResponse(message: String)
+
 object Routes:
   def routes(repo: Ref[IO, Repo]): HttpRoutes[IO] =
     HttpRoutes.of[IO] {
       case GET -> Root / "urls" =>
-        val listResp: IO[Map[String, List[ShortUrl]]] =
-          UrlService.getAll(repo).map(u => Map("urls" -> u.values.toList))
+        val listResp: IO[GetAllResponse] =
+          UrlService.getAll(repo).map(u => GetAllResponse(u.values.toList))
         Ok(listResp)
+
+      case GET -> Root / "urls" / url =>
+        UrlService.get(url, repo).flatMap {
+          case Some(u) => Ok(GetResponse(s"$u successfully retrieved", Some(u)))
+          case None    => NotFound(GetResponse(s"$url does not exist"))
+        }
 
       case req @ POST -> Root / "urls" =>
         for
-          shortUrl <- UrlService.generateShortUrl
+          genShort <- UrlService.generateShortUrl
           body <- req.as[PostBody]
-          resp <- Ok(UrlService.add(ShortUrl(shortUrl, body.url), repo))
+          shortUrl = ShortUrl(genShort, body.url)
+          _ <- UrlService.add(shortUrl, repo)
+          resp <- Ok(
+            CreateResponse(s"$shortUrl successfully created", shortUrl)
+          )
         yield resp
+
+      case DELETE -> Root / "urls" / url =>
+        UrlService
+          .remove(url, repo)
+          .flatMap(_ =>
+            Ok(DeleteResponse(s"Short URL $url successfully deleted."))
+          )
     }

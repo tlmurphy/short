@@ -35,6 +35,12 @@ class UrlServiceSpec extends CatsEffectSuite:
       .assertEquals(repo - "abc")
   }
 
+  test("remove doesn't exist") {
+    UrlService
+      .remove("hello", repoFixture())
+      .assertEquals(repo)
+  }
+
   test("add multiple then remove") {
     val url = ShortUrl("https://cool", "trevor")
     val url2 = ShortUrl("https://ok", "murphy")
