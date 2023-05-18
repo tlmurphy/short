@@ -31,11 +31,14 @@ on port 8080. To get to the webpage, navigate to http://localhost:8080.
 ## API Guide
 
 Create new short url mapping:
-```json
+
+```
 POST /urls
 BODY: { "url": "http://google.com" }
-RESP:
-201 CREATED
+RESP: 201 CREATED
+```
+
+```json
 {
   "message": "(o7iFyQz) -> (http://google.com) successfully created",
   "url": {
@@ -46,10 +49,13 @@ RESP:
 ```
 
 Get all url mappings:
-```json
+
+```
 GET /urls
-RESP:
-200 OK
+RESP: 200 OK
+```
+
+```json
 {
   "urls": [
     {
@@ -61,10 +67,13 @@ RESP:
 ```
 
 Get a single url mapping:
-```json
+
+```
 GET /urls/o7iFyQz
-RESP:
-200 OK
+RESP: 200 OK
+```
+
+```json
 {
   "message": "(o7iFyQz) -> (http://google.com) successfully retrieved",
   "url": {
@@ -75,10 +84,12 @@ RESP:
 ```
 
 Delete a single url mapping:
-```json
+```
 DELETE /urls/o7iFyQz
-RESP:
-200 OK
+RESP: 200 OK
+```
+
+```json
 {
   "message": "Short URL o7iFyQz successfully deleted."
 }
