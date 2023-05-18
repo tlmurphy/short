@@ -2,16 +2,14 @@ package com.tlmurphy.shortHttp4s
 
 import cats.effect.{IO, Resource}
 import cats.syntax.all.*
-import org.http4s.*
-import org.http4s.implicits.*
 import munit.CatsEffectSuite
 import com.tlmurphy.shortHttp4s.Models.{ShortUrl, Repo}
 import munit.catseffect.IOFixture
 
 class UrlServiceSpec extends CatsEffectSuite:
 
-  private val abcUrl = ShortUrl(uri"https://test.com", "abc")
-  private val defUrl = ShortUrl(uri"https://anothertest.com", "def")
+  private val abcUrl = ShortUrl("abc", "https://test.com")
+  private val defUrl = ShortUrl("def", "https://anothertest.com")
   private val repo = Map(
     "abc" -> abcUrl,
     "def" -> defUrl
@@ -25,7 +23,7 @@ class UrlServiceSpec extends CatsEffectSuite:
   override def munitFixtures: List[IOFixture[_]] = List(repoFixture)
 
   test("add") {
-    val url = ShortUrl(uri"https://cool", "trevor")
+    val url = ShortUrl("trevor", "https://cool")
     UrlService
       .add(url, repoFixture())
       .assertEquals(repo + ("trevor" -> url))
@@ -38,17 +36,15 @@ class UrlServiceSpec extends CatsEffectSuite:
   }
 
   test("add multiple then remove") {
-    val url = ShortUrl(uri"https://cool", "trevor")
-    val url2 = ShortUrl(uri"https://ok", "murphy")
-    for {
+    val url = ShortUrl("https://cool", "trevor")
+    val url2 = ShortUrl("https://ok", "murphy")
+    for
       _ <- List(
         UrlService.add(url, repoFixture()),
         UrlService.add(url2, repoFixture())
       ).parSequence
-      r <- UrlService.remove(url.shortened, repoFixture())
-    } yield {
-      assertEquals(r, repo + ("murphy" -> url2))
-    }
+      r <- UrlService.remove(url.shortUrl, repoFixture())
+    yield assertEquals(r, repo + ("murphy" -> url2))
   }
 
   test("get returns some url") {
@@ -67,4 +63,20 @@ class UrlServiceSpec extends CatsEffectSuite:
     UrlService
       .getAll(repoFixture())
       .assertEquals(repo)
+  }
+
+  test("generateShortUrl generates a 7 length alphanumeric string") {
+    UrlService.generateShortUrl
+      .map(s => s.length == 7 && s.forall(_.isLetterOrDigit))
+      .assertEquals(true)
+  }
+
+  test("generateShortUrl generates unique strings") {
+    List(
+      UrlService.generateShortUrl,
+      UrlService.generateShortUrl,
+      UrlService.generateShortUrl
+    ).parSequence
+      .map(urlList => urlList.size == urlList.distinct.size)
+      .assertEquals(true)
   }

@@ -4,4 +4,4 @@ import cats.effect.{IO, Ref}
 
 object Models:
   type Repo = Map[String, ShortUrl]
-  case class ShortUrl(original: Uri, shortened: String)
+  case class ShortUrl(shortUrl: String, originalUrl: String)

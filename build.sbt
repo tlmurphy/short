@@ -30,12 +30,13 @@ lazy val shortAkkaHttp = (project in file("short-akka-http"))
 lazy val shortHttp4s = (project in file("short-http4s"))
   .settings(
     name := "short-http4s",
-    scalaVersion := "3.1.0",
+    scalaVersion := "3.2.2",
     version := "0.1",
     libraryDependencies ++= Seq(
       "org.http4s" %% "http4s-ember-server" % Http4sVersion,
       "org.http4s" %% "http4s-ember-client" % Http4sVersion,
       "org.http4s" %% "http4s-circe" % Http4sVersion,
+      "io.circe" %% "circe-generic" % "0.14.1",
       "org.http4s" %% "http4s-dsl" % Http4sVersion,
       "org.typelevel" %% "munit-cats-effect" % "2.0.0-M3" % Test,
       "ch.qos.logback" % "logback-classic" % LogbackVersion

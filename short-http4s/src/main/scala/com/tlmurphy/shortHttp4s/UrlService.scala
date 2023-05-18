@@ -2,10 +2,12 @@ package com.tlmurphy.shortHttp4s
 
 import cats.effect.{IO, Ref}
 import com.tlmurphy.shortHttp4s.Models.{ShortUrl, Repo}
+import cats.effect.std.Random
+import cats.syntax.all.*
 
 object UrlService:
   def add(url: ShortUrl, repo: Ref[IO, Repo]): IO[Repo] =
-    repo.updateAndGet(r => r + (url.shortened -> url))
+    repo.updateAndGet(r => r + (url.shortUrl -> url))
 
   def remove(url: String, repo: Ref[IO, Repo]): IO[Repo] =
     repo.updateAndGet(r => r - url)
@@ -15,3 +17,10 @@ object UrlService:
 
   def getAll(repo: Ref[IO, Repo]): IO[Repo] =
     repo.get
+
+  def generateShortUrl: IO[String] =
+    Random
+      .scalaUtilRandom[IO]
+      .flatMap(x =>
+        List.fill(7)(x.nextAlphaNumeric).parSequence.map(_.mkString)
+      )
