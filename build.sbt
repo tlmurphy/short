@@ -43,3 +43,15 @@ lazy val shortHttp4s = (project in file("short-http4s"))
     ),
     testFrameworks += new TestFramework("munit.Framework")
   )
+
+lazy val shortPlay = (project in file("short-play"))
+  .enablePlugins(PlayScala)
+  .settings(
+    name := "short-play",
+    scalaVersion := "2.13.10",
+    version := "0.1",
+    libraryDependencies ++= Seq(
+      guice,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
+    )
+  )
