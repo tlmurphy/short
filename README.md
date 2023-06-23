@@ -9,8 +9,8 @@ A simple URL shortener.
 
 ## Running the App
 
-This application has two subprojects, one has the backend built using
-AkkaHttp, the other using Http4s.
+This application has multiple subprojects using different frameworks and
+libraries for the http server.
 
 > Note: Start the frontend and backend in separate terminal windows
 > I've had issues when attempting to start the akka-http backend
@@ -23,7 +23,9 @@ Starting the frontend:
 
 Starting the backend:
 
-`sbt shortAkkaHttp/run` or `sbt shortHttp4s/run`
+* akkahttp: `sbt shortAkkaHttp/run`
+* http4s: `sbt shortHttp4s/run`
+* play: `sbt shortPlay/run`
 
 The backend is served on port 8081 while the frontend is served
 on port 8080. To get to the webpage, navigate to http://localhost:8080.
