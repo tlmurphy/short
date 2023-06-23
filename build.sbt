@@ -53,5 +53,6 @@ lazy val shortPlay = (project in file("short-play"))
     libraryDependencies ++= Seq(
       guice,
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
-    )
+    ),
+    PlayKeys.playDefaultPort := 8081
   )
