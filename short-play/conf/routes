@@ -3,8 +3,21 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-# An example controller showing a sample home page
-GET     /hello                      controllers.HomeController.index()
-
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+# This isn't being used, just including it to ignore unused import error
+GET     /assets/*file                  controllers.Assets.versioned(path="/public", file: Asset)
+
+# Create a new short URL mapping
+POST     /urls                         controllers.UrlController.create()
+
+# Get all url mappings
+GET      /urls                         controllers.UrlController.getAll()
+
+# Get a single url mapping
+GET      /urls/:shortUrl               controllers.UrlController.get(shortUrl)
+
+# Delete a single URL mapping
+DELETE   /urls/:shortUrl               controllers.UrlController.delete(shortUrl)
+
+# Catch all for resolving short url
+GET      /:shortUrl                    controllers.UrlController.resolve(shortUrl)
