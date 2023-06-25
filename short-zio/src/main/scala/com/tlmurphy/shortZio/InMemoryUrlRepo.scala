@@ -4,10 +4,17 @@ import zio.*
 import Models.*
 
 final case class InMemoryUrlRepo(repo: Ref[Repo]) extends UrlRepo:
-  def add(url: ShortUrl): Task[Repo] = ???
-  def remove(url: String): Task[Repo] = ???
-  def get(urlKey: String): Task[Option[ShortUrl]] = ???
-  def getAll: Task[Repo] = ???
+  def add(url: ShortUrl): UIO[Repo] =
+    repo.updateAndGet(_ + (url.shortUrl -> url))
+
+  def remove(url: String): UIO[Repo] =
+    repo.updateAndGet(_ - url)
+
+  def get(urlKey: String): UIO[Option[ShortUrl]] =
+    repo.get.map(_.get(urlKey))
+
+  def getAll: UIO[Repo] =
+    repo.get
 
 object InMemoryUrlRepo {
   def layer: ZLayer[Any, Nothing, InMemoryUrlRepo] =
