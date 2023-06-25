@@ -1,7 +1,7 @@
 package com.tlmurphy.shortZio
 
 import zio.*
-import Models.*
+import models.{Repo, ShortUrl}
 
 trait UrlRepo {
   def add(url: ShortUrl): Task[Repo]

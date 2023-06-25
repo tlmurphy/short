@@ -1,7 +1,7 @@
 package com.tlmurphy.shortZio
 
 import zio.*
-import Models.*
+import models.{Repo, ShortUrl}
 
 final case class InMemoryUrlRepo(repo: Ref[Repo]) extends UrlRepo:
   def add(url: ShortUrl): UIO[Repo] =
