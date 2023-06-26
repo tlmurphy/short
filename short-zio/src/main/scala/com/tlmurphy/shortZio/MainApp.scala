@@ -1,10 +1,9 @@
 package com.tlmurphy.shortZio
 
 import zio.*
-import zhttp.service.Server
+import zio.http.*
 
 object MainApp extends ZIOAppDefault:
-  def run =
-    Server
-      .start(port = 8081, http = ShortApp())
-      .provide(InMemoryUrlRepo.layer)
+  def run = Server
+    .serve(ShortApp())
+    .provide(Server.defaultWithPort(8081), InMemoryUrlRepo.layer)

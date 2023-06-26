@@ -1,18 +1,21 @@
 package com.tlmurphy.shortZio
 
-import zhttp.http.*
 import zio.*
+import zio.http.*
 import zio.json.*
+import zio.http.HttpAppMiddleware.cors
+import zio.http.internal.middlewares.Cors.CorsConfig
 import models.*
 
 object ShortApp:
-  def apply(): Http[UrlRepo, Throwable, Request, Response] =
+  def apply(): HttpApp[UrlRepo, Nothing] =
     Http.collectZIO[Request] {
-      case Method.GET -> !! / "urls" =>
+      case Method.GET -> Root / "urls" =>
         UrlRepo.getAll
           .map(repo => Response.json(GetAllResponse(repo.values.toList).toJson))
+          .orDie
 
-      case Method.GET -> !! / "urls" / url =>
+      case Method.GET -> Root / "urls" / url =>
         UrlRepo
           .get(url)
           .map {
@@ -22,15 +25,16 @@ object ShortApp:
               )
             case None => Response.status(Status.NotFound)
           }
+          .orDie
 
-      case req @ Method.POST -> !! / "urls" =>
-        for {
+      case req @ Method.POST -> Root / "urls" =>
+        (for {
           body <- req.body.asString.map(_.fromJson[PostBody])
           req <- body match {
             case Left(e) =>
               ZIO
                 .debug(s"Failed to parse the input: $e")
-                .as(Response.text(e).setStatus(Status.BadRequest))
+                .as(Response.text(e).withStatus(Status.BadRequest))
             case Right(b) =>
               for {
                 short <- ShortUrlGenerator.generateShortUrl
@@ -43,11 +47,11 @@ object ShortApp:
                     shortUrl
                   ).toJson
                 )
-                .setStatus(Status.Created)
+                .withStatus(Status.Created)
           }
-        } yield req
+        } yield req).orDie
 
-      case Method.DELETE -> !! / "urls" / url =>
+      case Method.DELETE -> Root / "urls" / url =>
         UrlRepo
           .remove(url)
           .map(_ =>
@@ -55,10 +59,15 @@ object ShortApp:
               DeleteResponse(s"Short URL $url successfully deleted.").toJson
             )
           )
+          .orDie
 
-      case Method.GET -> !! / shortUrl =>
-        UrlRepo.get(shortUrl).map {
-          case Some(u) => Response.redirect(u.originalUrl, true)
-          case None    => Response.status(Status.NotFound)
-        }
-    }
+      case Method.GET -> Root / shortUrl =>
+        UrlRepo
+          .get(shortUrl)
+          .map {
+            case Some(u) =>
+              Response.redirect(URL(Path.decode(u.originalUrl)), true)
+            case None => Response.status(Status.NotFound)
+          }
+          .orDie
+    } @@ cors(CorsConfig())

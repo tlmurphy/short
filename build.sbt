@@ -11,7 +11,7 @@ val LogbackVersion = "1.2.6"
 // Zio Dependencies
 val zioVersion = "2.0.15"
 val zioJsonVersion = "0.5.0"
-val zioHttpVersion = "2.0.0-RC11"
+val zioHttpVersion = "3.0.0-RC2"
 
 lazy val shortAkkaHttp = (project in file("short-akka-http"))
   .settings(
@@ -71,6 +71,6 @@ lazy val shortZio = (project in file("short-zio"))
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio" % zioVersion,
       "dev.zio" %% "zio-json" % zioJsonVersion,
-      "io.d11" %% "zhttp" % zioHttpVersion
+      "dev.zio" %% "zio-http" % zioHttpVersion
     )
   )
