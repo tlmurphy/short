@@ -8,12 +8,11 @@ import zio.http.internal.middlewares.Cors.CorsConfig
 import models.*
 
 object ShortApp:
-  def apply(): HttpApp[UrlRepo, Nothing] =
+  def apply(): HttpApp[UrlRepo, Throwable] =
     Http.collectZIO[Request] {
       case Method.GET -> Root / "urls" =>
         UrlRepo.getAll
           .map(repo => Response.json(GetAllResponse(repo.values.toList).toJson))
-          .orDie
 
       case Method.GET -> Root / "urls" / url =>
         UrlRepo
@@ -25,10 +24,9 @@ object ShortApp:
               )
             case None => Response.status(Status.NotFound)
           }
-          .orDie
 
       case req @ Method.POST -> Root / "urls" =>
-        (for {
+        for {
           body <- req.body.asString.map(_.fromJson[PostBody])
           req <- body match {
             case Left(e) =>
@@ -49,7 +47,7 @@ object ShortApp:
                 )
                 .withStatus(Status.Created)
           }
-        } yield req).orDie
+        } yield req
 
       case Method.DELETE -> Root / "urls" / url =>
         UrlRepo
@@ -59,7 +57,6 @@ object ShortApp:
               DeleteResponse(s"Short URL $url successfully deleted.").toJson
             )
           )
-          .orDie
 
       case Method.GET -> Root / shortUrl =>
         UrlRepo
@@ -69,5 +66,4 @@ object ShortApp:
               Response.redirect(URL(Path.decode(u.originalUrl)), true)
             case None => Response.status(Status.NotFound)
           }
-          .orDie
     } @@ cors(CorsConfig())

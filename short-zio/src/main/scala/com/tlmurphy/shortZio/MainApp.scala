@@ -5,5 +5,5 @@ import zio.http.*
 
 object MainApp extends ZIOAppDefault:
   def run = Server
-    .serve(ShortApp())
+    .serve(ShortApp().withDefaultErrorResponse)
     .provide(Server.defaultWithPort(8081), InMemoryUrlRepo.layer)
