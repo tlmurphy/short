@@ -26,6 +26,7 @@ Starting the backend:
 * akkahttp: `sbt shortAkkaHttp/run`
 * http4s: `sbt shortHttp4s/run`
 * play: `sbt shortPlay/run`
+* zio: `sbt shortZio/run`
 
 The backend is served on port 8081 while the frontend is served
 on port 8080. To get to the webpage, navigate to http://localhost:8080.
