@@ -18,3 +18,5 @@ web/node_modules
 
 # play specific
 short-play/logs
+
+test
