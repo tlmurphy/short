@@ -42,8 +42,8 @@ class UrlServiceSpec extends CatsEffectSuite:
   }
 
   test("add multiple then remove") {
-    val url = ShortUrl("https://cool", "trevor")
-    val url2 = ShortUrl("https://ok", "murphy")
+    val url = ShortUrl("trevor", "https://cool")
+    val url2 = ShortUrl("murphy", "https://ok")
     for
       _ <- List(
         UrlService.add(url, repoFixture()),
